@@ -30,7 +30,7 @@ internal sealed class ProxyEndpointFactory
     private static readonly IEnableCorsAttribute _defaultCors = new EnableCorsAttribute();
     private static readonly IDisableCorsAttribute _disableCors = new DisableCorsAttribute();
     private static readonly IAllowAnonymous _allowAnonymous = new AllowAnonymousAttribute();
-
+    private readonly Dictionary<string, RequestDelegate> _routePipeline=new Dictionary<string, RequestDelegate>();
     private RequestDelegate? _pipeline;
 
     public Endpoint CreateEndpoint(RouteModel route, IReadOnlyList<Action<EndpointBuilder>> conventions)
@@ -40,9 +40,12 @@ internal sealed class ProxyEndpointFactory
 
         // Catch-all pattern when no path was specified
         var pathPattern = string.IsNullOrEmpty(match.Path) ? "/{**catchall}" : match.Path;
-
+        if (!_routePipeline.TryGetValue(route.Config.RouteId, out var pipeline))
+        {
+            pipeline = _pipeline;
+        }
         var endpointBuilder = new RouteEndpointBuilder(
-            requestDelegate: _pipeline ?? throw new InvalidOperationException("The pipeline hasn't been provided yet."),
+            requestDelegate: pipeline ?? throw new InvalidOperationException("The pipeline hasn't been provided yet."),
             routePattern: RoutePatternFactory.Parse(pathPattern),
             order: config.Order.GetValueOrDefault())
         {
@@ -143,5 +146,10 @@ internal sealed class ProxyEndpointFactory
     public void SetProxyPipeline(RequestDelegate pipeline)
     {
         _pipeline = pipeline ?? throw new ArgumentNullException(nameof(pipeline));
+    }
+
+    public void SetRouteProxyPipeline(string routeId,RequestDelegate pipeline)
+    {
+        _routePipeline.Add(routeId, pipeline);
     }
 }

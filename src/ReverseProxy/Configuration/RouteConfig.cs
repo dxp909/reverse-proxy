@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 using Yarp.ReverseProxy.Utilities;
 
 namespace Yarp.ReverseProxy.Configuration;
@@ -75,6 +76,8 @@ public sealed record RouteConfig
     /// Parameters used to transform the request and response. See <see cref="Transforms.Builder.ITransformBuilder"/>.
     /// </summary>
     public IReadOnlyList<IReadOnlyDictionary<string, string>>? Transforms { get; init; }
+
+    public RequestDelegate Pipeline { get; init; }
 
     public bool Equals(RouteConfig? other)
     {
