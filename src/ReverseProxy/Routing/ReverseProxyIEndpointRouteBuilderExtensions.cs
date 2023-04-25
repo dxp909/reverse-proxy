@@ -60,7 +60,7 @@ public static class ReverseProxyIEndpointRouteBuilderExtensions
         return GetOrCreateDataSource(endpoints).DefaultBuilder;
     }
 
-    public static IEndpointRouteBuilder UseRoutePipeline(this IEndpointRouteBuilder endpoints,string routeId, Action<IReverseProxyApplicationBuilder> configureApp)
+    public static IEndpointRouteBuilder MapRouteReverseProxy(this IEndpointRouteBuilder endpoints,string routeId, Action<IReverseProxyApplicationBuilder> configureApp)
     {
         if (endpoints is null)
         {
@@ -79,7 +79,7 @@ public static class ReverseProxyIEndpointRouteBuilderExtensions
         var app = proxyAppBuilder.Build();
 
         var proxyEndpointFactory = endpoints.ServiceProvider.GetRequiredService<ProxyEndpointFactory>();
-        proxyEndpointFactory.SetRouteProxyPipeline(routeId,app);
+        proxyEndpointFactory.SetRouteProxyPipeline("route"+routeId,app);
         return endpoints;
     }
 
